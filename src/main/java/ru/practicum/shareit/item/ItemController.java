@@ -27,7 +27,8 @@ public class ItemController {
     @ResponseStatus(HttpStatus.CREATED)
     public ItemDto addItem(
             @RequestBody @Valid CreateItemDto itemDto,
-            @Positive @RequestHeader("X-Sharer-User-Id") Long userId
+            @Positive(message = "Id должно быть больше 0")
+            @RequestHeader("X-Sharer-User-Id") Long userId
     ) {
         return itemService.createItem(itemDto, userId);
     }
@@ -35,15 +36,17 @@ public class ItemController {
     @PatchMapping("/{itemId}")
     public ItemDto updateItem(
             @RequestBody @Valid UpdateItemDto itemDto,
-            @Positive @RequestHeader("X-Sharer-User-Id") Long userId,
-            @PathVariable @Positive Long itemId
+            @Positive(message = "Id рользователя должно быть больше 0")
+            @RequestHeader("X-Sharer-User-Id") Long userId,
+            @Positive(message = "Id должно быть больше 0") @PathVariable Long itemId
     ) {
         return itemService.updateItem(itemDto, userId, itemId);
     }
 
     @GetMapping("/{itemId}")
     public ItemDto findItemById(
-            @Positive @PathVariable Long itemId
+            @Positive(message = "Id должно быть больше 0")
+            @PathVariable Long itemId
     ) {
         return itemService.getItemById(itemId);
     }
@@ -57,7 +60,8 @@ public class ItemController {
 
     @GetMapping
     public List<ItemDto> findItemsByUserId(
-            @Positive @RequestHeader("X-Sharer-User-Id") Long userId
+            @Positive(message = "Id рользователя должно быть больше 0")
+            @RequestHeader("X-Sharer-User-Id") Long userId
     ) {
         return itemService.getItemsByUserid(userId);
     }

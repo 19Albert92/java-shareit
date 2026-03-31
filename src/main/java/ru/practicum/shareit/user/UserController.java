@@ -30,26 +30,30 @@ public class UserController {
 
     @GetMapping("/{userid}")
     public UserDto getUser(
-            @Positive @PathVariable Long userid
+            @Positive(message = "Id должно быть больше 0") @PathVariable Long userid
     ) {
         return userService.findUserById(userid);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public UserDto createUser(@Valid @RequestBody CreateUserDto userDto) {
+    public UserDto createUser(
+            @Valid @RequestBody CreateUserDto userDto
+    ) {
         return userService.createUser(userDto);
     }
 
     @DeleteMapping("/{userid}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteUser(@Positive @PathVariable Long userid) {
+    public void deleteUser(
+            @Positive(message = "Id должно быть больше 0") @PathVariable Long userid
+    ) {
         userService.deleteUser(userid);
     }
 
     @PatchMapping("/{userid}")
     public UserDto updateUser(
-            @Positive @PathVariable Long userid,
+            @Positive(message = "Id должно быть больше 0") @PathVariable Long userid,
             @Valid @RequestBody UpdateUserDto userDto
     ) {
         return userService.updateUser(userDto, userid);
