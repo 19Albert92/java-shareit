@@ -1,12 +1,16 @@
-package ru.practicum.shareit.item;
+package ru.practicum.shareit.item.service;
 
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.item.ItemMapper;
+import ru.practicum.shareit.item.exeption.ItemNotFoundException;
 import ru.practicum.shareit.item.dto.CreateItemDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.UpdateItemDto;
+import ru.practicum.shareit.item.exeption.NotUserPermissionException;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.user.UserService;
+import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.user.service.UserService;
 
 import java.util.Collections;
 import java.util.List;
@@ -60,6 +64,10 @@ public class ItemServiceImpl implements ItemService {
 
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new ItemNotFoundException("Вещь с таким id не найден"));
+
+        if (!item.getOwner().equals(userid)) {
+            throw new NotUserPermissionException("Пользователь не является владельцем");
+        }
 
         item = itemRepository.update(ItemMapper.toItemWithUpdateFields(item, itemDto));
 

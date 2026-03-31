@@ -9,8 +9,8 @@ import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
-import ru.practicum.shareit.user.EmailAlreadyUserException;
-import ru.practicum.shareit.user.UserNotFoundException;
+import ru.practicum.shareit.user.exception.EmailAlreadyUserException;
+import ru.practicum.shareit.user.exception.UserNotFoundException;
 
 import java.util.Map;
 import java.util.stream.Collectors;

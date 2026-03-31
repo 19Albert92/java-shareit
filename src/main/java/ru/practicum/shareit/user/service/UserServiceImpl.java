@@ -1,11 +1,16 @@
-package ru.practicum.shareit.user;
+package ru.practicum.shareit.user.service;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.user.exception.EmailAlreadyUserException;
+import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.UserMapper;
+import ru.practicum.shareit.user.exception.UserNotFoundException;
 import ru.practicum.shareit.user.dto.CreateUserDto;
 import ru.practicum.shareit.user.dto.UpdateUserDto;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.List;
 
@@ -18,7 +23,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto createUser(CreateUserDto userDto) throws EmailAlreadyUserException {
-        if (userRepository.emailExists(userDto.getEmail())) {
+        if (!userRepository.emailExists(userDto.getEmail())) {
 
             User user = UserMapper.toUser(userDto);
 
@@ -39,7 +44,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(userid)
                 .orElseThrow(() -> new UserNotFoundException("Пользователь с таким id не найден"));
 
-        if (userDto.getEmail() != null && !userRepository.emailExists(userDto.getEmail())) {
+        if (userDto.getEmail() != null && userRepository.emailExists(userDto.getEmail())) {
             throw new EmailAlreadyUserException("Email уже используется");
         }
 
