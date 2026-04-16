@@ -1,9 +1,10 @@
-package ru.practicum.shareit.item.dto;
+package ru.practicum.shareit.item.dto.item;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.practicum.shareit.user.dto.UserDto;
 
 /**
  * TODO Sprint add-controllers.
@@ -17,6 +18,6 @@ public class ItemDto {
     private String name;
     private String description;
     private boolean available;
-    private Long owner;
+    private UserDto owner;
     private Long request;
 }

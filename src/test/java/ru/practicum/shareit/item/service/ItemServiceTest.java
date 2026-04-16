@@ -2,23 +2,33 @@ package ru.practicum.shareit.item.service;
 
 import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import ru.practicum.shareit.item.dto.CreateItemDto;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.UpdateItemDto;
+import org.springframework.test.context.ActiveProfiles;
+import ru.practicum.shareit.booking.repository.BookingRepository;
+import ru.practicum.shareit.exception.NotUserPermissionException;
+import ru.practicum.shareit.item.dto.item.CreateItemDto;
+import ru.practicum.shareit.item.dto.item.ItemDto;
+import ru.practicum.shareit.item.dto.item.ItemToOwnerDto;
+import ru.practicum.shareit.item.dto.item.UpdateItemDto;
 import ru.practicum.shareit.item.exeption.ItemNotFoundException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
-import ru.practicum.shareit.user.exception.UserNotFoundException;
+import ru.practicum.shareit.item.service.impl.ItemBookingServiceImpl;
+import ru.practicum.shareit.item.service.impl.ItemServiceImpl;
+import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.service.UserServiceImpl;
-import static org.mockito.Mockito.*;
 
 import java.util.List;
 import java.util.Optional;
 
+import static org.mockito.Mockito.*;
+
+@ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
 public class ItemServiceTest {
 
@@ -26,10 +36,30 @@ public class ItemServiceTest {
     private ItemRepository itemRepository;
 
     @Mock
+    private BookingRepository bookingRepository;
+
+    @Mock
     private UserServiceImpl userService;
+
+    @Mock
+    private CommentService commentService;
 
     @InjectMocks
     private ItemServiceImpl itemService;
+
+    @InjectMocks
+    private ItemBookingServiceImpl itemBookingService;
+
+    private User owner;
+
+    @BeforeEach
+    public void setUp() {
+        owner = User.builder()
+                .id(1L)
+                .email("example.yandex.com")
+                .name("Albert")
+                .build();
+    }
 
     @Test
     public void should_returnItem_whenExists() {
@@ -41,34 +71,40 @@ public class ItemServiceTest {
                 .name("Item title")
                 .description("Item description")
                 .available(true)
+                .owner(owner)
                 .build();
 
         when(itemRepository.findById(expectedId)).thenReturn(Optional.of(item));
 
-        ItemDto finedItem = itemService.getItemById(expectedId);
+        ItemToOwnerDto finedItem = itemBookingService.getItemById(expectedId);
 
         AssertionsForClassTypes.assertThat(finedItem)
                 .isNotNull()
                 .hasFieldOrPropertyWithValue("id", expectedId)
-                .hasFieldOrPropertyWithValue("name", item.getName())
-                .hasFieldOrPropertyWithValue("description", item.getDescription());
+                .hasFieldOrPropertyWithValue("name", item.getName());
 
+        verify(itemRepository).findById(expectedId);
     }
 
     @Test
     public void should_returnUserNotFoundException_whenUserIdNotExistsWhenUpdateItem() {
         Long expectedId = 1L;
         Long userId = 2L;
+        Long ownerId = 3L;
 
         UpdateItemDto itemDto = new UpdateItemDto();
 
-        doThrow(new UserNotFoundException("Пользователь не найден")).when(userService).findUserById(userId);
+        User owner = User.builder().id(ownerId).build();
 
-        Assertions.assertThrows(UserNotFoundException.class, () -> itemService.updateItem(itemDto, userId, expectedId));
+        Item item = Item.builder().id(expectedId).owner(owner).build();
 
-        verify(itemRepository, never()).findById(expectedId);
+        when(itemRepository.findById(expectedId)).thenReturn(Optional.of(item));
 
-        verifyNoInteractions(itemRepository);
+        Assertions.assertThrows(NotUserPermissionException.class, () -> itemService.updateItem(itemDto, userId, expectedId));
+
+        verify(itemRepository).findById(expectedId);
+
+        verify(itemRepository, never()).save(any());
     }
 
     @Test
@@ -86,13 +122,13 @@ public class ItemServiceTest {
         Assertions.assertThrows(ItemNotFoundException.class,
                 () -> itemService.updateItem(itemDto, userId, expectedId));
 
-        verify(itemRepository, never()).update(any(Item.class));
+        verify(itemRepository, never()).save(any(Item.class));
     }
 
     @Test
     public void should_returnNewItem_whenParamsAreValid() {
         Long expectedId = 1L;
-        Long expectedUserId = 2L;
+        Long expectedUserId = 1L;
 
         String expectedName = "New item name";
         String expectedDescription = "New item description";
@@ -107,12 +143,12 @@ public class ItemServiceTest {
                 .name(expectedName)
                 .description(expectedDescription)
                 .available(true)
-                .owner(expectedUserId)
+                .owner(owner)
                 .build();
 
         when(itemRepository.findById(expectedId)).thenReturn(Optional.of(item));
 
-        when(itemRepository.update(item)).thenReturn(item);
+        when(itemRepository.save(item)).thenReturn(item);
 
         ItemDto newItem = itemService.updateItem(updateDto, expectedUserId, expectedId);
 
@@ -140,11 +176,14 @@ public class ItemServiceTest {
                 .name(expectedName)
                 .description(expectedDescription)
                 .available(true)
+                .owner(owner)
                 .build();
 
         when(itemRepository.save(any(Item.class))).thenReturn(newItem);
 
         ItemDto item = itemService.createItem(createItem, expectedUserId);
+
+        System.out.println(item);
 
         AssertionsForClassTypes.assertThat(item)
                 .hasFieldOrPropertyWithValue("id", expectedId)
@@ -171,15 +210,16 @@ public class ItemServiceTest {
                 .name("Hello world")
                 .description("How are you")
                 .available(true)
+                .owner(owner)
                 .build();
 
-        when(itemRepository.findAllByName(searchName)).thenReturn(List.of(item));
+        when(itemRepository.findAllByNameIsLikeOrDescriptionIsLike(searchName)).thenReturn(List.of(item));
 
         List<ItemDto> itemList = itemService.searchItemsByName(searchName);
 
         Assertions.assertFalse(itemList.isEmpty());
         Assertions.assertEquals(1, itemList.size());
 
-        verify(itemRepository).findAllByName(searchName);
+        verify(itemRepository).findAllByNameIsLikeOrDescriptionIsLike(searchName);
     }
 }

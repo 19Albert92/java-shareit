@@ -2,11 +2,18 @@ package ru.practicum.shareit.item.controller;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.item.dto.CreateItemDto;
-import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.dto.UpdateItemDto;
+import ru.practicum.shareit.item.dto.comment.CommentDto;
+import ru.practicum.shareit.item.dto.comment.CreateCommentDto;
+import ru.practicum.shareit.item.dto.item.CreateItemDto;
+import ru.practicum.shareit.item.dto.item.ItemDto;
+import ru.practicum.shareit.item.dto.item.ItemToOwnerDto;
+import ru.practicum.shareit.item.dto.item.UpdateItemDto;
+import ru.practicum.shareit.item.service.CommentService;
+import ru.practicum.shareit.item.service.ItemBookingService;
 import ru.practicum.shareit.item.service.ItemService;
 
 import java.util.List;
@@ -16,13 +23,15 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/items")
+@RequiredArgsConstructor
+@Slf4j
 public class ItemController {
 
     private final ItemService itemService;
 
-    public ItemController(ItemService itemService) {
-        this.itemService = itemService;
-    }
+    private final ItemBookingService itemBookingService;
+
+    private final CommentService commentService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -36,7 +45,7 @@ public class ItemController {
 
     @PatchMapping("/{itemId}")
     public ItemDto updateItem(
-            @RequestBody @Valid UpdateItemDto itemDto,
+            @RequestBody UpdateItemDto itemDto,
             @Positive(message = "Id рользователя должно быть больше 0")
             @RequestHeader("X-Sharer-User-Id") Long userId,
             @Positive(message = "Id должно быть больше 0") @PathVariable Long itemId
@@ -45,11 +54,11 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto findItemById(
+    public ItemToOwnerDto findItemById(
             @Positive(message = "Id должно быть больше 0")
             @PathVariable Long itemId
     ) {
-        return itemService.getItemById(itemId);
+        return itemBookingService.getItemById(itemId);
     }
 
     @GetMapping("/search")
@@ -60,10 +69,21 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemDto> findItemsByUserId(
+    public List<ItemToOwnerDto> findItemsByUserId(
             @Positive(message = "Id рользователя должно быть больше 0")
             @RequestHeader("X-Sharer-User-Id") Long userId
     ) {
-        return itemService.getItemsByUserid(userId);
+        return itemBookingService.findItemsWithAfterAndBeforeBookingDateByUserId(userId);
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentDto addComment(
+            @Positive(message = "Id должно быть больше 0")
+            @PathVariable Long itemId,
+            @Positive(message = "Id рользователя должно быть больше 0")
+            @RequestHeader("X-Sharer-User-Id") Long userId,
+            @Valid @RequestBody CreateCommentDto commentDto
+    ) {
+        return commentService.addComment(itemId, userId, commentDto);
     }
 }
