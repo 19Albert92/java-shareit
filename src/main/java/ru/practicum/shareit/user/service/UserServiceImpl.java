@@ -3,13 +3,13 @@ package ru.practicum.shareit.user.service;
 import lombok.AllArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.user.exception.EmailAlreadyUserException;
-import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.UserMapper;
-import ru.practicum.shareit.user.exception.UserNotFoundException;
 import ru.practicum.shareit.user.dto.CreateUserDto;
 import ru.practicum.shareit.user.dto.UpdateUserDto;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.exception.EmailAlreadyUserException;
+import ru.practicum.shareit.user.exception.UserNotFoundException;
+import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.List;
@@ -23,7 +23,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto createUser(CreateUserDto userDto) throws EmailAlreadyUserException {
-        if (!userRepository.emailExists(userDto.getEmail())) {
+        if (userRepository.findByEmail(userDto.getEmail()).isEmpty()) {
 
             User user = UserMapper.toUser(userDto);
 
@@ -41,14 +41,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto updateUser(UpdateUserDto userDto, Long userid) throws EmailAlreadyUserException, UserNotFoundException {
-        User user = userRepository.findById(userid)
-                .orElseThrow(() -> new UserNotFoundException("Пользователь с таким id не найден"));
+        User user = findUserEntityByIdOrThrowAnException(userid);
 
-        if (userDto.getEmail() != null && userRepository.emailExists(userDto.getEmail())) {
+        if (userDto.getEmail() != null && userRepository.findByEmail(userDto.getEmail()).isPresent()) {
             throw new EmailAlreadyUserException("Email уже используется");
         }
 
-        user = userRepository.update(UserMapper.toUserWithUpdateFields(user, userDto));
+        user = userRepository.save(UserMapper.toUserWithUpdateFields(user, userDto));
 
         log.info("[UserServiceImpl.updateUser] пользователь успешно обнавлен");
 
@@ -57,8 +56,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUser(Long userid) throws UserNotFoundException {
-        userRepository.findById(userid)
-                .orElseThrow(() -> new UserNotFoundException("Пользователь с таким id не найден"));
+        findUserEntityByIdOrThrowAnException(userid);
 
         userRepository.deleteById(userid);
     }
@@ -72,8 +70,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto findUserById(Long userid) throws UserNotFoundException {
+        return UserMapper.toUserDto(findUserEntityByIdOrThrowAnException(userid));
+    }
+
+    public User findUserEntityByIdOrThrowAnException(Long userid) {
         return userRepository.findById(userid)
-                .map(UserMapper::toUserDto)
                 .orElseThrow(() -> new UserNotFoundException("Пользователь с таким id не найден"));
     }
 }

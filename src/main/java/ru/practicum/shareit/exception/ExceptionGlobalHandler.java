@@ -9,6 +9,9 @@ import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import ru.practicum.shareit.booking.exception.BookingNotFoundException;
+import ru.practicum.shareit.booking.exception.NotAvailableItemException;
+import ru.practicum.shareit.item.exeption.ItemNotFoundException;
 import ru.practicum.shareit.user.exception.EmailAlreadyUserException;
 import ru.practicum.shareit.user.exception.UserNotFoundException;
 
@@ -19,21 +22,28 @@ import java.util.stream.Collectors;
 public class ExceptionGlobalHandler {
 
     @ExceptionHandler(EmailAlreadyUserException.class)
-    public ResponseEntity<ErrorResponse> handleEmailAlreadyUserException(EmailAlreadyUserException e) {
+    public ResponseEntity<ErrorResponse> handleEmailAlreadyUserException(RuntimeException e) {
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
                 .body(new ErrorResponse(e.getMessage(), Map.of()));
     }
 
-    @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleUserNotFoundException(UserNotFoundException e) {
+    @ExceptionHandler({UserNotFoundException.class, ItemNotFoundException.class})
+    public ResponseEntity<ErrorResponse> handleUserNotFoundException(RuntimeException e) {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .body(new ErrorResponse(e.getMessage(), Map.of()));
     }
 
-    @ExceptionHandler(ValidationException.class)
-    public ResponseEntity<ErrorResponse> handleValidationException(ValidationException e) {
+    @ExceptionHandler({NotUserPermissionException.class})
+    public ResponseEntity<ErrorResponse> handleUserNotUserPermissionException(RuntimeException e) {
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(new ErrorResponse(e.getMessage(), Map.of()));
+    }
+
+    @ExceptionHandler({ValidationException.class, BookingNotFoundException.class})
+    public ResponseEntity<ErrorResponse> handleValidationException(RuntimeException e) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponse(e.getMessage(), Map.of()));
@@ -41,6 +51,13 @@ public class ExceptionGlobalHandler {
 
     @ExceptionHandler(MissingRequestHeaderException.class)
     public ResponseEntity<ErrorResponse> handleMissingRequestHeaderException(MissingRequestHeaderException e) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(e.getMessage(), Map.of()));
+    }
+
+    @ExceptionHandler({NotAvailableItemException.class, InvalidBookingDateException.class})
+    public ResponseEntity<ErrorResponse> handleUserAccessViolationException(RuntimeException e) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponse(e.getMessage(), Map.of()));

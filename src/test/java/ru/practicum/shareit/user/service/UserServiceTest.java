@@ -8,6 +8,7 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.context.ActiveProfiles;
 import ru.practicum.shareit.user.dto.UpdateUserDto;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.exception.UserNotFoundException;
@@ -21,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
+@ActiveProfiles("test")
 @ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
 
@@ -72,11 +74,11 @@ public class UserServiceTest {
 
         when(userRepository.findById(expectedId)).thenReturn(Optional.ofNullable(user));
 
-        when(userRepository.update(any(User.class))).thenReturn(user);
+        when(userRepository.save(any(User.class))).thenReturn(user);
 
         userService.updateUser(patchedUser, expectedId);
 
-        verify(userRepository).update(userCaptor.capture());
+        verify(userRepository).save(userCaptor.capture());
 
         User savedUser = userCaptor.getValue();
 
@@ -104,13 +106,13 @@ public class UserServiceTest {
 
         when(userRepository.findById(expectedId)).thenReturn(Optional.ofNullable(user));
 
-        when(userRepository.emailExists(any(String.class))).thenReturn(Boolean.FALSE);
+        when(userRepository.findByEmail(any(String.class))).thenReturn(Optional.empty());
 
-        when(userRepository.update(any(User.class))).thenReturn(user);
+        when(userRepository.save(any(User.class))).thenReturn(user);
 
         userService.updateUser(patchedUser, expectedId);
 
-        verify(userRepository).update(userCaptor.capture());
+        verify(userRepository).save(userCaptor.capture());
 
         User savedUser = userCaptor.getValue();
 
