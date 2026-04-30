@@ -5,8 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.practicum.shareit.item.model.Item;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * TODO Sprint add-item-requests.
@@ -30,4 +32,7 @@ public class ItemRequest {
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+
+    @OneToMany(mappedBy = "requestId", fetch = FetchType.LAZY)
+    private List<Item> items;
 }

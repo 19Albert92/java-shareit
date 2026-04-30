@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.model.ItemShortData;
 
 import java.util.List;
 
@@ -19,4 +20,6 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     List<Item> findAllByNameIsLikeOrDescriptionIsLike(String name);
 
     List<Item> findAllByOwnerId(Long id);
+
+    List<ItemShortData> findAllByRequestIdIn(List<Long> requestIds);
 }

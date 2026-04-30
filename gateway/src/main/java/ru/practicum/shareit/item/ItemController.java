@@ -22,7 +22,7 @@ public class ItemController {
     @ResponseStatus(HttpStatus.CREATED)
     public Object addItem(
             @RequestBody @Valid CreateItemDto itemDto,
-            @Positive(message = "Id должно быть больше 0")
+            @Positive(message = "Id пользователя должно быть больше 0")
             @RequestHeader("X-Sharer-User-Id") Long userId
     ) {
         return itemClient.createItem(itemDto, userId);
@@ -31,7 +31,7 @@ public class ItemController {
     @PatchMapping("/{itemId}")
     public Object updateItem(
             @RequestBody UpdateItemDto itemDto,
-            @Positive(message = "Id рользователя должно быть больше 0")
+            @Positive(message = "Id пользователя должно быть больше 0")
             @RequestHeader("X-Sharer-User-Id") Long userId,
             @Positive(message = "Id должно быть больше 0") @PathVariable Long itemId
     ) {
@@ -56,7 +56,7 @@ public class ItemController {
 
     @GetMapping
     public Object findItemsByUserId(
-            @Positive(message = "Id рользователя должно быть больше 0")
+            @Positive(message = "Id пользователя должно быть больше 0")
             @RequestHeader("X-Sharer-User-Id") Long userId
     ) {
         return itemClient.findItemsWithAfterAndBeforeBookingDateByUserId(userId);
@@ -66,7 +66,7 @@ public class ItemController {
     public Object addComment(
             @Positive(message = "Id должно быть больше 0")
             @PathVariable Long itemId,
-            @Positive(message = "Id рользователя должно быть больше 0")
+            @Positive(message = "Id пользователя должно быть больше 0")
             @RequestHeader("X-Sharer-User-Id") Long userId,
             @Valid @RequestBody CreateCommentDto commentDto
     ) {

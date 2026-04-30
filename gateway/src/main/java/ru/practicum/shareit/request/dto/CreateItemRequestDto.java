@@ -1,10 +1,10 @@
 package ru.practicum.shareit.request.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import lombok.Getter;
+import lombok.Data;
 
-@Getter
+@Data
 public class CreateItemRequestDto {
-    @NotBlank(message = "Описания запроса не должна быть пустой")
+    @NotBlank(message = "Описания запроса не должен быть пустым")
     private String description;
 }

@@ -11,6 +11,7 @@ import ru.practicum.shareit.item.dto.item.UpdateItemDto;
 import ru.practicum.shareit.item.exeption.ItemNotFoundException;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.model.ItemShortData;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.user.model.User;
@@ -74,6 +75,11 @@ public class ItemServiceImpl implements ItemService {
         return itemRepository.findAllByNameIsLikeOrDescriptionIsLike(name).stream()
                 .map(ItemMapper::toItemDto)
                 .toList();
+    }
+
+    @Override
+    public List<ItemShortData> findAllByRequestIds(List<Long> requestIds) {
+        return itemRepository.findAllByRequestIdIn(requestIds);
     }
 
     public Item findItemEntityByIdOrThrowOnException(Long id) throws ItemNotFoundException {
