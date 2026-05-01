@@ -21,7 +21,7 @@ public interface RequestRepository extends JpaRepository<ItemRequest, Long> {
             select r
             from ItemRequest as r
             left join fetch r.items
-            where r.id = :requestorId
+            where r.id = :id
             """)
-    Optional<ItemRequest> findItemRequestByWithItems(@Param("requestorId") Long requestorId);
+    Optional<ItemRequest> findItemRequestByWithItems(@Param("id") Long id);
 }

@@ -49,7 +49,7 @@ public class BookingController {
             @RequestHeader("X-Sharer-User-Id") Long userId,
             @RequestParam(defaultValue = "ALL") BookingState state
     ) {
-        return bookingService.findBookingByState(userId, state);
+        return bookingService.findBookingByState(userId, state, false);
     }
 
     @GetMapping("/owner")
@@ -57,6 +57,6 @@ public class BookingController {
             @RequestHeader("X-Sharer-User-Id") Long userId,
             @RequestParam(defaultValue = "ALL") BookingState state
     ) {
-        return bookingService.findBookingByOwnerWithState(userId, state);
+        return bookingService.findBookingByState(userId, state, true);
     }
 }

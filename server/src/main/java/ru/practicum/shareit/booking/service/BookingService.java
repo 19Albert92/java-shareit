@@ -13,9 +13,7 @@ public interface BookingService {
 
     BookingDto findBookingById(Long id, Long userId);
 
-    List<BookingDto> findBookingByState(Long userId, BookingState state);
-
-    List<BookingDto> findBookingByOwnerWithState(Long userId, BookingState state);
+    List<BookingDto> findBookingByState(Long userId, BookingState state, boolean byOwner);
 
     boolean existsBookingByUserIdAndItemId(Long itemId, Long userId);
 }
