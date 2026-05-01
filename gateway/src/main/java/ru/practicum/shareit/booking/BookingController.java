@@ -24,8 +24,8 @@ public class BookingController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<Object> saveBooking(
-            @Valid @RequestBody CreateBookingDto bookingDto,
-            @Positive(message = "Id должно быть больше 0") @RequestHeader("X-Sharer-User-Id") Long userId
+            @Positive(message = "Id должно быть больше 0") @RequestHeader("X-Sharer-User-Id") Long userId,
+            @Valid @RequestBody CreateBookingDto bookingDto
     ) {
         log.info("Creating booking {}, userId={}", bookingDto, userId);
         return bookingClient.createBooking(userId, bookingDto);
@@ -33,7 +33,7 @@ public class BookingController {
 
     @PatchMapping("/{bookingId}")
     public ResponseEntity<Object> updateApproveBooking(
-            @Positive(message = "Id должно быть больше 0") @PathVariable("bookingId") Long bookingId,
+            @Positive(message = "Id бронирования должно быть больше 0") @PathVariable("bookingId") Long bookingId,
             @RequestParam(defaultValue = "false") boolean approved,
             @Positive(message = "Id должно быть больше 0") @RequestHeader("X-Sharer-User-Id") Long userId
     ) {
@@ -42,7 +42,7 @@ public class BookingController {
 
     @GetMapping("/{bookingId}")
     public ResponseEntity<Object> getBooking(
-            @Positive(message = "Id должно быть больше 0") @PathVariable("bookingId") Long bookingId,
+            @Positive(message = "Id бронирования должно быть больше 0") @PathVariable("bookingId") Long bookingId,
             @Positive(message = "Id должно быть больше 0") @RequestHeader("X-Sharer-User-Id") Long userId
     ) {
         log.info("Get booking {}, userId={}", bookingId, userId);
