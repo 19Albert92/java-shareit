@@ -25,6 +25,9 @@ public class BookingMapper {
     }
 
     public static BookingDto toBookingDto(Booking booking) {
+
+        if (booking == null) return null;
+
         return BookingDto.builder()
                 .id(booking.getId())
                 .start(booking.getStart())

@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.request.dto.CreateItemRequestDto;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
@@ -22,6 +23,7 @@ public class ItemRequestController {
     private final RequestService requestService;
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public ItemRequestDto addRequest(
             @RequestBody CreateItemRequestDto itemRequest,
             @RequestHeader("X-Sharer-User-Id") Long userId

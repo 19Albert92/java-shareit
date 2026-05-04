@@ -38,7 +38,7 @@ public class RequestServiceImpl implements RequestService {
     @Transactional
     public ItemRequestDto createRequest(CreateItemRequestDto createRequest, Long userId) {
 
-        userService.findUserById(userId);
+        userService.findUserEntityByIdOrThrowAnException(userId);
 
         ItemRequest request = RequestMapper.toItemRequest(createRequest);
 
@@ -54,7 +54,7 @@ public class RequestServiceImpl implements RequestService {
     @Override
     public List<ItemRequestDto> findAllMyRequests(Long userId, Pageable pageable) {
 
-        userService.findUserById(userId);
+        userService.findUserEntityByIdOrThrowAnException(userId);
 
         List<ItemRequest> requests = requestRepository.findItemRequestsByRequestorIdWithItems(userId);
 
@@ -74,7 +74,7 @@ public class RequestServiceImpl implements RequestService {
     @Override
     public List<ItemRequestDto> findAllRequests(Long userId, Pageable pageable) {
 
-        userService.findUserById(userId);
+        userService.findUserEntityByIdOrThrowAnException(userId);
 
         return requestRepository.findAll(pageable).stream()
                 .map(RequestMapper::toRequestDto)
@@ -84,7 +84,7 @@ public class RequestServiceImpl implements RequestService {
     @Override
     public ItemRequestDto findRequestById(Long userId, Long requestId) {
 
-        userService.findUserById(userId);
+        userService.findUserEntityByIdOrThrowAnException(userId);
 
         Optional<ItemRequest> request = requestRepository.findItemRequestByWithItems(requestId);
 

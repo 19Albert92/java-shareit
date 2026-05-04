@@ -151,19 +151,12 @@ public class BookingServiceImpl implements BookingService {
 
         LocalDateTime now = LocalDateTime.now();
 
-        return switch (state) {
-            case WAITING -> (root, query, cb) ->
-                    cb.equal(root.get("status"), BookingStatus.WAITING);
-            case REJECTED -> (root, query, cb) ->
-                    cb.equal(root.get("status"), BookingStatus.REJECTED);
-            case PAST -> (root, query, cb) ->
-                    cb.lessThan(root.get("end"), now);
-            case FUTURE -> (root, query, cb) ->
-                    cb.greaterThan(root.get("start"), now);
-            case CURRENT -> (root, query, cb) -> cb.and(
-                    cb.lessThan(root.get("start"), now),
-                    cb.greaterThan(root.get("end"), now)
-            );
+        return (root, query, cb) -> switch (state) {
+            case WAITING -> cb.equal(root.get("status"), BookingStatus.WAITING);
+            case REJECTED -> cb.equal(root.get("status"), BookingStatus.REJECTED);
+            case PAST -> cb.lessThan(root.get("end"), now);
+            case FUTURE -> cb.greaterThan(root.get("start"), now);
+            case CURRENT -> cb.and(cb.lessThan(root.get("start"), now), cb.greaterThan(root.get("end"), now));
             default -> null;
         };
     }

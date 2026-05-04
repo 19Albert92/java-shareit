@@ -2,7 +2,6 @@ package ru.practicum.shareit.item.mapper;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.dto.comment.CommentDto;
@@ -42,19 +41,9 @@ public class ItemMapper {
     }
 
     public static ItemToOwnerDto toItemOwnerDto(Item item,
-                                                List<Booking> firstBookingList,
-                                                List<Booking> lastBookingList,
+                                                Booking firstBooking,
+                                                Booking lastBooking,
                                                 List<Comment> commentsList) {
-
-        BookingDto firstBooking = firstBookingList.stream()
-                .map(BookingMapper::toBookingDto)
-                .findFirst()
-                .orElse(null);
-
-        BookingDto lastBooking = lastBookingList.stream()
-                .map(BookingMapper::toBookingDto)
-                .findFirst()
-                .orElse(null);
 
         List<CommentDto> comments = commentsList.stream()
                 .map(CommentMapper::toCommentDto).toList();
@@ -66,8 +55,8 @@ public class ItemMapper {
                 .description(item.getDescription())
                 .owner(UserMapper.toUserDto(item.getOwner()))
                 .request(item.getRequestId())
-                .nextBooking(firstBooking)
-                .lastBooking(lastBooking)
+                .nextBooking(BookingMapper.toBookingDto(firstBooking))
+                .lastBooking(BookingMapper.toBookingDto(lastBooking))
                 .comments(comments)
                 .build();
     }

@@ -48,25 +48,45 @@ public class ItemBookingServiceImpl implements ItemBookingService {
 
         List<Long> itemIds = items.stream().map(Item::getId).toList();
 
-        Map<Long, List<Booking>> lastBooking = bookingRepository
-                .findAllByStatusNotAndStartLessThanAndItemIdInOrderByStartDesc(BookingStatus.REJECTED, now, itemIds)
-                .stream().collect(Collectors.groupingBy(b -> b.getItem().getId()));
+        Map<Long, Booking> lastBooking = getLastBookingsByItemIds(itemIds);
 
-        Map<Long, List<Booking>> firstBooking = bookingRepository
-                .findAllByStatusNotAndStartGreaterThanAndItemIdInOrderByStartAsc(BookingStatus.REJECTED, now, itemIds)
-                .stream().collect(Collectors.groupingBy(b -> b.getItem().getId()));
+        Map<Long, Booking> firstBooking = getFirstBookingByItemIds(itemIds);
 
-        Map<Long, List<Comment>> comments = commentService.findCommentsByItemIds(itemIds).stream()
-                .collect(Collectors.groupingBy(comment -> comment.getItem().getId()));
+        Map<Long, List<Comment>> comments = getCommentsByItemIds(itemIds);
 
         return items.stream()
                 .map(item -> ItemMapper.toItemOwnerDto(
                         item,
-                        firstBooking.getOrDefault(item.getId(), List.of()),
-                        lastBooking.getOrDefault(item.getId(), List.of()),
+                        firstBooking.getOrDefault(item.getId(), null),
+                        lastBooking.getOrDefault(item.getId(), null),
                         comments.getOrDefault(item.getId(), List.of())
                 ))
                 .toList();
+    }
+
+    private Map<Long, Booking> getLastBookingsByItemIds(List<Long> ids) {
+        return bookingRepository
+                .findAllByStatusNotAndStartLessThanAndItemIdInOrderByStartDesc(BookingStatus.REJECTED, now, ids)
+                .stream().collect(Collectors.toMap(
+                        b -> b.getItem().getId(),
+                        b -> b,
+                        (e1, e2) -> e1
+                ));
+    }
+
+    private Map<Long, Booking> getFirstBookingByItemIds(List<Long> ids) {
+        return bookingRepository
+                .findAllByStatusNotAndStartGreaterThanAndItemIdInOrderByStartAsc(BookingStatus.REJECTED, now, ids)
+                .stream().collect(Collectors.toMap(
+                        b -> b.getItem().getId(),
+                        b -> b,
+                        (e1, e2) -> e1
+                ));
+    }
+
+    private Map<Long, List<Comment>> getCommentsByItemIds(List<Long> ids) {
+        return commentService.findCommentsByItemIds(ids).stream()
+                .collect(Collectors.groupingBy(comment -> comment.getItem().getId()));
     }
 
     @Override
@@ -80,16 +100,15 @@ public class ItemBookingServiceImpl implements ItemBookingService {
 
         Long itemId = item.get().getOwner().getId();
 
-        List<Booking> lastBooking = bookingRepository
-                .findAllByStatusNotAndStartLessThanAndItemIdInOrderByStartDesc(
-                        BookingStatus.REJECTED, now, List.of(itemId));
+        Map<Long, Booking> lastBooking = getLastBookingsByItemIds(List.of(itemId));
 
-        List<Booking> firstBooking = bookingRepository
-                .findAllByStatusNotAndStartGreaterThanAndItemIdInOrderByStartAsc(
-                        BookingStatus.REJECTED, now, List.of(itemId));
+        Map<Long, Booking> firstBooking = getFirstBookingByItemIds(List.of(itemId));
 
         List<Comment> comments = commentService.findCommentsByOwnerId(itemId);
 
-        return ItemMapper.toItemOwnerDto(item.get(), firstBooking, lastBooking, comments);
+        return ItemMapper.toItemOwnerDto(item.get(),
+                firstBooking.getOrDefault(itemId, null),
+                lastBooking.getOrDefault(itemId, null),
+                comments);
     }
 }
