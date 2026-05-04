@@ -3,6 +3,7 @@ package ru.practicum.shareit.booking.dto;
 import lombok.Getter;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Getter
 public enum BookingState {
@@ -14,11 +15,8 @@ public enum BookingState {
     REJECTED;
 
     public static Optional<BookingState> from(String stringState) {
-        for (BookingState state : values()) {
-            if (state.name().equalsIgnoreCase(stringState)) {
-                return Optional.of(state);
-            }
-        }
-        return Optional.empty();
+        return Stream.of(values())
+                .filter(s -> s.name().equalsIgnoreCase(stringState))
+                .findFirst();
     }
 }

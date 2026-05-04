@@ -1,11 +1,10 @@
 package ru.practicum.shareit.user.dto;
 
-import lombok.Data;
-
-@Data
-public class UpdateUserDto {
-
-    private String name;
-
-    private String email;
+public record UpdateUserDto(
+        String name,
+        String email
+) {
+    public UpdateUserDto() {
+        this(null, null);
+    }
 }
