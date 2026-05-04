@@ -57,6 +57,29 @@ class ItemControllerTest extends BaseUnitTest {
     }
 
     @Test
+    void shouldReturnStatus201_whenItemCreated() throws Exception {
+
+        CreateItemDto createItemDto = new CreateItemDto();
+        createItemDto.setName("test name");
+        createItemDto.setDescription("description");
+        createItemDto.setAvailable(true);
+
+        when(itemClient.createItem(any(CreateItemDto.class), anyLong()))
+                .thenReturn(ResponseEntity.status(HttpStatus.CREATED).build());
+
+        mockMvc.perform(
+                        post("/items")
+                                .headers(getHeaders())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .accept(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(createItemDto))
+                )
+                .andExpect(status().isCreated());
+
+        verify(itemClient).createItem(any(CreateItemDto.class), eq(USER_ID));
+    }
+
+    @Test
     void shouldReturnStatus200_whenItemUpdated() throws Exception {
 
         UpdateItemDto updateItemDto = new UpdateItemDto();
@@ -177,5 +200,20 @@ class ItemControllerTest extends BaseUnitTest {
                 .andExpect(status().isOk());
 
         verify(itemClient).searchItemsByName(eq(USER_ID), eq(text));
+    }
+
+    @Test
+    void shouldItems_whenFindByUserId() throws Exception {
+        when(itemClient.findItemsWithAfterAndBeforeBookingDateByUserId(anyLong()))
+                .thenReturn(ResponseEntity.ok().build());
+
+        mockMvc.perform(
+                get("/items")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .headers(getHeaders())
+                        .accept(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isOk());
+
+        verify(itemClient).findItemsWithAfterAndBeforeBookingDateByUserId(eq(USER_ID));
     }
 }
