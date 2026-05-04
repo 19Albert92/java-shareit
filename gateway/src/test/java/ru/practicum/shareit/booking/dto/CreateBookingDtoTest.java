@@ -20,7 +20,7 @@ class CreateBookingDtoTest {
 
     @BeforeEach
     void setUp() {
-        try(ValidatorFactory factory = Validation.buildDefaultValidatorFactory()) {
+        try (ValidatorFactory factory = Validation.buildDefaultValidatorFactory()) {
             validator = factory.getValidator();
         }
 

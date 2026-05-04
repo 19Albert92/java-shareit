@@ -32,7 +32,7 @@ class BookingControllerTest extends BaseUnitTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private final long BOOKING_ID = 1L;
+    private final long bookingId = 1L;
 
     @Test
     void shouldReturnStatus404_whenUserHeaderIsMissing() throws Exception {
@@ -83,13 +83,14 @@ class BookingControllerTest extends BaseUnitTest {
                 .thenReturn(ResponseEntity.ok().build());
 
         mockMvc.perform(
-                        patch("/bookings/{bookingId}?approved={approved}", BOOKING_ID, approved)
+                        patch("/bookings/{bookingId}", bookingId)
+                                .param("approved", String.valueOf(approved))
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .headers(getHeaders())
                                 .accept(MediaType.APPLICATION_JSON)
                 ).andExpect(status().isOk());
 
-        verify(bookingClient).updateBooking(BOOKING_ID, USER_ID, approved);
+        verify(bookingClient).updateBooking(bookingId, USER_ID, approved);
     }
 
     @Test
@@ -98,13 +99,13 @@ class BookingControllerTest extends BaseUnitTest {
         when(bookingClient.getBooking(anyLong(), anyLong())).thenReturn(ResponseEntity.ok().build());
 
         mockMvc.perform(
-                get("/bookings/{bookingId}", BOOKING_ID)
+                get("/bookings/{bookingId}", bookingId)
                         .accept(MediaType.APPLICATION_JSON)
                         .headers(getHeaders())
                         .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isOk());
 
-        verify(bookingClient).getBooking(USER_ID, BOOKING_ID);
+        verify(bookingClient).getBooking(USER_ID, bookingId);
     }
 
     @Test

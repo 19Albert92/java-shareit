@@ -36,7 +36,7 @@ class ItemControllerTest extends BaseUnitTest {
     @MockBean
     private ItemClient itemClient;
 
-    private final long ITEM_ID = 1L;
+    private final long itemId = 1L;
 
     @Test
     void shouldReturnStatus404_whenUserHeaderIsMissing() throws Exception {
@@ -65,7 +65,7 @@ class ItemControllerTest extends BaseUnitTest {
                 .thenReturn(ResponseEntity.ok().build());
 
         mockMvc.perform(
-                        patch("/items/{itemId}", ITEM_ID)
+                        patch("/items/{itemId}", itemId)
                                 .content(objectMapper.writeValueAsString(updateItemDto))
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .headers(getHeaders())
@@ -75,7 +75,7 @@ class ItemControllerTest extends BaseUnitTest {
                 .andExpect(status().isOk());
 
         verify(itemClient, times(1)).updateItem(
-                any(UpdateItemDto.class), eq(USER_ID), eq(ITEM_ID));
+                any(UpdateItemDto.class), eq(USER_ID), eq(itemId));
     }
 
     @Test
@@ -108,14 +108,14 @@ class ItemControllerTest extends BaseUnitTest {
                 .thenReturn(ResponseEntity.ok().build());
 
         mockMvc.perform(
-                        get("/items/{itemId}", ITEM_ID)
+                        get("/items/{itemId}", itemId)
                                 .characterEncoding(StandardCharsets.UTF_8)
                                 .headers(getHeaders())
                                 .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isOk());
 
-        verify(itemClient).getItemById(ITEM_ID);
+        verify(itemClient).getItemById(itemId);
     }
 
     @Test
@@ -128,7 +128,7 @@ class ItemControllerTest extends BaseUnitTest {
                 .thenReturn(ResponseEntity.status(HttpStatus.CREATED).build());
 
         mockMvc.perform(
-                        post("/items/{itemId}/comment", ITEM_ID)
+                        post("/items/{itemId}/comment", itemId)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(createCommentDto))
                                 .headers(getHeaders())
@@ -147,7 +147,7 @@ class ItemControllerTest extends BaseUnitTest {
                 .thenThrow(HandlerMethodValidationException.class);
 
         mockMvc.perform(
-                        post("/items/{itemId}/comment", ITEM_ID)
+                        post("/items/{itemId}/comment", itemId)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(createCommentDto))
                                 .headers(getHeaders())
